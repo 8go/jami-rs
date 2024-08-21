@@ -117,7 +117,7 @@ impl ProfileManager {
      */
     pub fn username_found(&mut self, uri: &String, username: &String) {
         if self.profiles.contains_key(uri) {
-            let mut profile = self.profiles.get_mut(uri).unwrap();
+            let profile = self.profiles.get_mut(uri).unwrap();
             profile.username = username.to_string();
         } else {
             let mut profile = Profile::new();
