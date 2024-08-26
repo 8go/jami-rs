@@ -1019,69 +1019,63 @@ impl Jami {
     }
 
     /**
-     * Remove a conversation for an account
-     * @param id        Id of the account
-     * @param conv_id   Id of the conversation
-     * @param hash      Id of the member to invite
-     * @param hash      Id of the member to invite
+     * Send a text message to a conversation swarm of an account
+     * See https://git.jami.net/savoirfairelinux/jami-daemon/-/blob/master/bin/dbus/cx.ring.Ring.ConfigurationManager.xml
+     * for more details of the API call.
+     * @param account_id    Id of the account
+     * @param conv_id       Id of the conversation
+     * @param message       Messageto be sent to conversation swarm
+     * @param commit_id     commitId
+     * @param flag          flag
      */
-    pub fn send_conversation_message(
-        id: &String,
+    pub fn send_message(
+        account_id: &String,
         conv_id: &String,
         message: &String,
-        parent: &String,
-    ) -> u64 {
+        commit_id: &String,
+        flag: &i32,
+    ) {
         let conn = Connection::new_session().unwrap();
         let proxy = conn.with_proxy(
             "cx.ring.Ring",
             "/cx/ring/Ring/ConfigurationManager",
             Duration::from_millis(5000),
         );
-        let result: Result<(u64,), _> = proxy.method_call(
+        let _: Result<(), _> = proxy.method_call(
             "cx.ring.Ring.ConfigurationManager",
             "sendMessage",
-            (id, conv_id, message, parent),
+            (account_id, conv_id, message, commit_id, flag),
         );
-        if result.is_ok() {
-            return result.unwrap().0;
-        }
-        0
     }
 
     /**
-     * Send a file to a conversation
-     * @param account_id        Related account
-     * @param conv_id           Related conversation
-     * @param path              Path of the file to send
-     * @return id of the transfer
+     * Send a file to a conversation swarm of an account
+     * See https://git.jami.net/savoirfairelinux/jami-daemon/-/blob/master/bin/dbus/cx.ring.Ring.ConfigurationManager.xml
+     * for more details of the API call.
+     * @param account_id        Id of the account
+     * @param conv_id           Id of the conversation
+     * @param file_path         Path of the file to send
+     * @param file_display_name Label attached to file for display
+     * @param reply_to          reply to
      */
-    pub fn send_file(account_id: String, conv_id: String, path: String) -> u64 {
+    pub fn send_file(
+        account_id: &String,
+        conv_id: &String,
+        file_path: &String,
+        file_display_name: &String,
+        reply_to: &String,
+    ) {
         let conn = Connection::new_session().unwrap();
         let proxy = conn.with_proxy(
             "cx.ring.Ring",
             "/cx/ring/Ring/ConfigurationManager",
             Duration::from_millis(5000),
         );
-        let info = DataTransferInfo {
-            account_id,
-            last_event: 0,
-            flags: 0,
-            total: 0,
-            bytes_progress: 0,
-            author: String::new(),
-            peer: String::new(),
-            conv_id,
-            display_name: String::new(),
-            path,
-            mimetype: String::new()
-        };
-        let id = 0 as u64;
         let _: Result<(), _> = proxy.method_call(
             "cx.ring.Ring.ConfigurationManager",
             "sendFile",
-            (info.tuple(), id),
+            (account_id, conv_id, file_path, file_display_name, reply_to),
         );
-        id
     }
 
     /**
